@@ -8,7 +8,9 @@ export default function Home() {
     axios
       .get("https://fortnite-api.com/v2/stats/br/v2", {
         params: {
-          name: "ALITARC05",
+        //   name: "ALITARC05",
+        //   name: "DullestYapper9",
+          name: "JussefoX",
         },
         headers: {
             'Authorization': 'e0b93223-19ba-406c-840f-4793374fd8ee'

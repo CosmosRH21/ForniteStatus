@@ -1,17 +1,21 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import {Container} from "@mui/material";
+import { Container, CircularProgress, Grid, Stack } from "@mui/material";
+import MyAppBar from "../Components/MyAppBar";
 import CardProfile from "../Components/CardProfile";
 
 export default function Home() {
   const [seasonLevels, setSeasonLevels] = useState({});
+  const [seasonImg, setSeasonImg] = useState({});
   const [seasonMap, setSeasonMap] = useState({});
   const [seasonNews, setSeasonNews] = useState({});
-  const names = ["ALITARC05", "DullestYapper9", "JussefoX"];
+  const [seasonShop, setSeasonShop] = useState({});
+  const names = ["DullestYapper9", "ALITARC05", "JussefoX"];
 
   useEffect(() => {
     const fetchSeasonLevels = async () => {
       const newSeasonLevels = {};
+      const newSeasonImgs = {};
       for (const name of names) {
         try {
           const response = await axios.get("https://fortnite-api.com/v2/stats/br/v2", {
@@ -25,12 +29,14 @@ export default function Home() {
             },
           });
           newSeasonLevels[name] = response.data.data.battlePass.level;
-          console.log(response.data.data.image);
+          newSeasonImgs[name] = response.data.data.image;
+          // console.log(response.data.data.image);
         } catch (error) {
           console.log(error);
         }
       }
       setSeasonLevels(newSeasonLevels);
+      setSeasonImg(newSeasonImgs);
     };
     const fetchSeasonMap = async () => {
       let newSeasonMap;
@@ -67,29 +73,56 @@ export default function Home() {
       }
       setSeasonNews(newSeasonNews);
     };
+    const fetchSeasonShop = async () => {
+      let newSeasonShop;
+      try {
+        const response = await axios.get("https://fortnite-api.com/v2/shop/br", {
+          params: {
+            language: "es",
+          },
+          headers: {
+            Authorization: "e0b93223-19ba-406c-840f-4793374fd8ee",
+          },
+        });
+        newSeasonShop = response;
+        // console.log(newSeasonShop.data.data);
+      } catch (error) {
+        console.log(error);
+      }
+      setSeasonShop(newSeasonShop);
+    };
     fetchSeasonLevels();
     fetchSeasonMap();
     fetchSeasonNews();
+    fetchSeasonShop();
   }, []);
 
   return (
-    <Container>
-      <h1 style={{ fontFamily: "fortnite", fontSize: "48px" }}>HOME</h1>
-      {Object.keys(seasonLevels).length > 0 ? (
-        <div>
-          {names.map((name, index) => (
-            <p key={index}>
-              Nivel actual de la temporada de {name}: {seasonLevels[name]}
-            </p>
-          ))}
-        </div>
-      ) : (
-        <p>Cargando...</p>
-      )}
-      <CardProfile />
-      <br />
-      {/* {seasonNews ? <img src={seasonNews.data.data.br.image} alt="imgNew" /> : <p>Cargando...</p>}
-      {seasonMap ? <img src={seasonMap} alt="mapa" /> : <p>Cargando...</p>} */}
-    </Container>
+    <>
+      <div className="fondo"></div>
+      <MyAppBar />
+      <Container>
+        <h1 style={{ fontFamily: "fortnite", fontSize: "48px" }}>Nivel Global</h1>
+
+        <Grid container spacing={4}>
+          {Object.keys(seasonLevels).length > 0 ? (
+            names.map((name, index) => (
+              <Grid item key={index} sm={4}>
+                <CardProfile name={name} nivel={seasonLevels[name]} img={seasonImg[name]} />
+              </Grid>
+            ))
+          ) : (
+            <CircularProgress />
+          )}
+        </Grid>
+
+        <br />
+        <br />
+
+        {Object.keys(seasonNews).length > 0 ? <img src={seasonNews.data.data.br.image} alt="imgNew" /> : <CircularProgress />}
+
+        {/* {Object.keys(seasonMap).length > 0 ? <img src={seasonMap} alt="mapa" /> : <CircularProgress />} */}
+      </Container>
+    </>
   );
 }
